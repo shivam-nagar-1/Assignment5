@@ -102,3 +102,11 @@ module.exports.getStudentsByCourse = function (course) {
     });
 };
 
+module.exports.addStudent = function (studentData) {
+    return new Promise((resolve, reject) => {
+        studentData.TA = (studentData.TA) ? true : false;
+        studentData.studentNum = dataCollection.students.length + 1;
+        dataCollection.students.push(studentData);
+        resolve();
+    });
+}

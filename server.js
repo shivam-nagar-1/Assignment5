@@ -18,7 +18,10 @@ const collegeData = require('./modules/collegeData'); // Import the collegeData 
 const app = express(); 
 
 // Middleware to serve static files from the 'public' directory
-app.use(express.static('views'));
+app.use(express.static('public'));
+
+// Adding body-parser
+app.use(express.urlencoded({ extended: true }));
 
 // Defining our route to get all students and/or students by course
 app.get('/students', (req, res) => {
@@ -71,6 +74,24 @@ app.get('/about', (req, res) => {
 app.get('/htmlDemo', (req, res) => {
   res.sendFile(path.join(__dirname, 'views/htmlDemo.html')); // Send the htmlDemo.html file
 });
+
+// Route to adding students 
+app.get("/students/add", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/addStudent.html"));
+});
+
+// Post route for adding students
+app.post("/students/add", (req, res) => {
+  collegeData.addStudent(req.body)
+      .then(() => {
+          res.redirect("/students");
+      })
+      .catch((error) => {
+          console.error(error);
+          res.status(500).send("Error adding student");
+      });
+});
+
 
 // Handling invalid and/or no matching routes "Page Not Found" with HTTP status 404
 app.use((req, res) => {
