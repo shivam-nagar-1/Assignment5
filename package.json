@@ -72,6 +72,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "Nicholas Nwanua Ilechie",
-  "license": "ISC"
+  "author": "Shivam Nagar",
+  "license": "ISC",
+  "keywords": []
 }
