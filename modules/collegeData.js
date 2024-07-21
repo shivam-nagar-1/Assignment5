@@ -1,112 +1,106 @@
-const fs = require("fs");
+/*********************************************************************************
+*  WEB700 – Assignment 05
+*  I declare that this assignment is my own work in accordance with Seneca Academic Policy.  No part 
+*  of this assignment has been copied manually or electronically from any other source 
+*  (including 3rd party web sites) or distributed to other students.
+* 
+*  Name: Shivam Nagar Student ID: 142227230 Date: July 20, 2024
+*
+********************************************************************************/
 
-class Data{
-    constructor(students, courses){
-        this.students = students;
-        this.courses = courses;
-    }
+const fs = require('fs'); // Import fs module
+const path = require('path'); // Import path module
+
+const dataFilePath = path.join(__dirname, 'data', 'courses.json'); // Path for courses data file
+
+// Function to get all Courses 
+function getAllCourses() {
+    return JSON.parse(fs.readFileSync(coursesFilePath, 'utf-8'));
 }
 
-let dataCollection = null;
+module.exports = { getAllCourses };
 
-module.exports.initialize = function () {
-    return new Promise( (resolve, reject) => {
-        fs.readFile('./data/courses.json','utf8', (err, courseData) => {
-            if (err) {
-                reject("unable to load courses"); return;
-            }
-
-            fs.readFile('./data/students.json','utf8', (err, studentData) => {
-                if (err) {
-                    reject("unable to load students"); return;
-                }
-
-                dataCollection = new Data(JSON.parse(studentData), JSON.parse(courseData));
-                resolve();
-            });
-        });
+// Function to get all students
+function getAllStudents() {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.join(__dirname, 'data', 'students.json'), 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(data));
+      }
     });
+  });
 }
 
-module.exports.getAllStudents = function(){
-    return new Promise((resolve,reject)=>{
-        if (dataCollection.students.length == 0) {
-            reject("query returned 0 results"); return;
-        }
-
-        resolve(dataCollection.students);
-    })
+// Function to get students by course
+function getStudentsByCourse(course) {
+  return getAllStudents().then(students => {
+    return students.filter(student => student.course === course);
+  });
 }
 
-module.exports.getTAs = function () {
-    return new Promise(function (resolve, reject) {
-        var filteredStudents = [];
-
-        for (let i = 0; i < dataCollection.students.length; i++) {
-            if (dataCollection.students[i].TA == true) {
-                filteredStudents.push(dataCollection.students[i]);
-            }
-        }
-
-        if (filteredStudents.length == 0) {
-            reject("query returned 0 results"); return;
-        }
-
-        resolve(filteredStudents);
+// Function to get TAs
+function getTAs() {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path.join(__dirname, 'data', 'tas.json'), 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(data));
+      }
     });
-};
-
-module.exports.getCourses = function(){
-   return new Promise((resolve,reject)=>{
-    if (dataCollection.courses.length == 0) {
-        reject("query returned 0 results"); return;
-    }
-
-    resolve(dataCollection.courses);
-   });
-};
-
-module.exports.getStudentByNum = function (num) {
-    return new Promise(function (resolve, reject) {
-        var foundStudent = null;
-
-        for (let i = 0; i < dataCollection.students.length; i++) {
-            if (dataCollection.students[i].studentNum == num) {
-                foundStudent = dataCollection.students[i];
-            }
-        }
-
-        if (!foundStudent) {
-            reject("query returned 0 results"); return;
-        }
-
-        resolve(foundStudent);
-    });
-};
-
-module.exports.getStudentsByCourse = function (course) {
-    return new Promise(function (resolve, reject) {
-        var filteredStudents = [];
-
-        for (let i = 0; i < dataCollection.students.length; i++) {
-            if (dataCollection.students[i].course == course) {
-                filteredStudents.push(dataCollection.students[i]);
-            }
-        }
-
-        if (filteredStudents.length == 0) {
-            reject("query returned 0 results"); return;
-        }
-
-        resolve(filteredStudents);
-    });
-};
-
-module.exports.addStudent = function (studentData) {
-    return new Promise((resolve, reject) => {
-        studentData.TA = (studentData.TA) ? true : false;
-        studentData.studentNum = dataCollection.students.length + 1;
-        dataCollection.students.push(studentData);
-        resolve();
-    });
+  });
 }
+
+// Function to get all courses
+function getCourses() {
+  return new Promise((resolve, reject) => {
+    fs.readFile(dataFilePath, 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(JSON.parse(data));
+      }
+    });
+  });
+}
+
+// Function to get a specific student by their student number
+function getStudentByNum(num) {
+  return getAllStudents().then(students => {
+    return students.find(student => student.num === num);
+  });
+}
+
+// Function to add a new student
+function addStudent(student) {
+  return new Promise((resolve, reject) => {
+    getAllStudents().then(students => {
+      students.push(student);
+      fs.writeFile(path.join(__dirname, 'data', 'students.json'), JSON.stringify(students), err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    }).catch(reject);
+  });
+}
+
+// Function to initialize data
+function initialize() {
+  // Example initialization code
+  return Promise.resolve(); // Adjust based on actual initialization logic
+}
+
+module.exports = {
+  getAllStudents,
+  getStudentsByCourse,
+  getTAs,
+  getCourses,
+  getStudentByNum,
+  addStudent,
+  initialize
+};
